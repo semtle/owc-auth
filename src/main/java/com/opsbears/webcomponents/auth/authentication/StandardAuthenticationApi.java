@@ -1,4 +1,4 @@
-package com.opsbears.webcomponents.auth.auth;
+package com.opsbears.webcomponents.auth.authentication;
 
 import com.opsbears.webcomponents.auth.hashing.PasswordHashingService;
 

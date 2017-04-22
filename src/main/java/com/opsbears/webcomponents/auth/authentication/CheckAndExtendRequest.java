@@ -1,4 +1,4 @@
-package com.opsbears.webcomponents.auth.auth;
+package com.opsbears.webcomponents.auth.authentication;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;

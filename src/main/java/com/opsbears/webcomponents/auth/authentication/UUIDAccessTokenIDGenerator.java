@@ -1,4 +1,4 @@
-package com.opsbears.webcomponents.auth.auth;
+package com.opsbears.webcomponents.auth.authentication;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.UUID;

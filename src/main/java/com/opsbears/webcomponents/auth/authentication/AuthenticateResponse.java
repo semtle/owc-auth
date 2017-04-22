@@ -1,14 +1,12 @@
-package com.opsbears.webcomponents.auth.auth;
+package com.opsbears.webcomponents.auth.authentication;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
-public class CheckAccessTokenResponse {
-    private final AccessToken accessToken;
+public class AuthenticateResponse {
+    private AccessToken accessToken;
 
-    public CheckAccessTokenResponse(
-        AccessToken accessToken
-    ) {
+    public AuthenticateResponse(AccessToken accessToken) {
         this.accessToken = accessToken;
     }
 

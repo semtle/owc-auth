@@ -1,8 +1,7 @@
-package com.opsbears.webcomponents.auth.auth;
+package com.opsbears.webcomponents.auth.authentication;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @ParametersAreNonnullByDefault
 public class AccessToken {
