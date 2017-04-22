@@ -39,23 +39,7 @@ public class PasswordHashingService {
      * @return the hashed password in MCF format
      */
     public String hash(String plainTextPassword) {
-        for (PasswordHashingProvider passwordHashingProvider : passwordHashingProviders) {
-            if (passwordHashingProvider.isSecure()) {
-                return passwordHashingProvider.hash(plainTextPassword);
-            }
-        }
-        throw new NoSecureHashingProviderFoundException();
-    }
-
-    private PasswordHashingProvider findHashingProvider(String hash) {
-        for (PasswordHashingProvider passwordHashingProvider : passwordHashingProviders) {
-            for (String prefix : passwordHashingProvider.getMCFHashPrefixes()) {
-                if (hash.startsWith(prefix)) {
-                    return passwordHashingProvider;
-                }
-            }
-        }
-        throw new NoMatchingHashingProviderFoundException();
+        return findSecureHashingProvider().hash(plainTextPassword);
     }
 
     /**
@@ -79,5 +63,25 @@ public class PasswordHashingService {
      */
     public Boolean needsRehash(String hashedPassword) {
         return findHashingProvider(hashedPassword).needsRehash(hashedPassword);
+    }
+
+    private PasswordHashingProvider findSecureHashingProvider() {
+        for (PasswordHashingProvider passwordHashingProvider : passwordHashingProviders) {
+            if (passwordHashingProvider.isSecure()) {
+                return passwordHashingProvider;
+            }
+        }
+        throw new NoSecureHashingProviderFoundException();
+    }
+
+    private PasswordHashingProvider findHashingProvider(String hash) {
+        for (PasswordHashingProvider passwordHashingProvider : passwordHashingProviders) {
+            for (String prefix : passwordHashingProvider.getMCFHashPrefixes()) {
+                if (hash.startsWith(prefix)) {
+                    return passwordHashingProvider;
+                }
+            }
+        }
+        throw new NoMatchingHashingProviderFoundException();
     }
 }
