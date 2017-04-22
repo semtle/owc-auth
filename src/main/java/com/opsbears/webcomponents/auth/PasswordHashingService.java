@@ -23,8 +23,6 @@ public class PasswordHashingService {
                 new UnixDisabledHashingProvider(),
                 new PBKDF2HashingProvider(1000, 16, new SecureRandomSaltGenerator()),
                 new BCryptHashingProvider(),
-                new SHA512CryptHashingProvider(),
-                new SHA256CryptHashingProvider(),
                 new MD5CryptHashingProvider(new SecureRandomSaltGenerator()),
                 new NTLMHashingProvider(),
                 new UnixCryptHashingProvider()
