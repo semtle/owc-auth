@@ -1,6 +1,5 @@
-package com.opsbears.webcomponents.auth;
+package com.opsbears.webcomponents.auth.hashing;
 
-import com.opsbears.webcomponents.auth.hashing.*;
 import com.opsbears.webcomponents.auth.random.SecureRandomSaltGenerator;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -8,17 +7,17 @@ import java.util.Arrays;
 import java.util.List;
 
 @ParametersAreNonnullByDefault
-public class PasswordHashingService {
+public class PasswordHashingServiceImpl implements PasswordHashingService {
     private final List<PasswordHashingProvider> passwordHashingProviders;
 
-    public PasswordHashingService(
+    public PasswordHashingServiceImpl(
         List<PasswordHashingProvider> passwordHashingProviders
     ) {
         this.passwordHashingProviders = passwordHashingProviders;
     }
 
-    public static PasswordHashingService getDefaultHashingConfiguration() {
-        return new PasswordHashingService(
+    public static PasswordHashingServiceImpl getDefaultHashingConfiguration() {
+        return new PasswordHashingServiceImpl(
             Arrays.asList(
                 new UnixDisabledHashingProvider(),
                 new PBKDF2HashingProvider(1000, 16, new SecureRandomSaltGenerator()),
@@ -38,6 +37,7 @@ public class PasswordHashingService {
      *
      * @return the hashed password in MCF format
      */
+    @Override
     public String hash(String plainTextPassword) {
         return findSecureHashingProvider().hash(plainTextPassword);
     }
@@ -50,6 +50,7 @@ public class PasswordHashingService {
      *
      * @return true if the passwords match, false otherwise.
      */
+    @Override
     public Boolean verify(String plainTextPassword, String hashedPassword) {
         return findHashingProvider(hashedPassword).verify(plainTextPassword, hashedPassword);
     }
@@ -61,6 +62,7 @@ public class PasswordHashingService {
      *
      * @return true if the password needs rehashing, false otherwise.
      */
+    @Override
     public Boolean needsRehash(String hashedPassword) {
         return findHashingProvider(hashedPassword).needsRehash(hashedPassword);
     }

@@ -1,4 +1,4 @@
-package com.opsbears.webcomponents.auth;
+package com.opsbears.webcomponents.auth.hashing;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
