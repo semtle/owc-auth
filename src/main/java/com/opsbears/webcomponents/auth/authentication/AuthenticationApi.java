@@ -18,19 +18,19 @@ public interface AuthenticationApi {
      */
     AuthenticateResponse authenticate(
         AuthenticateRequest request
-    ) throws InvalidCredentialsException, TemporaryAuthenticationFailureException;
+    ) throws InvalidCredentialsException, TemporaryAuthenticationFailureException, AuthenticationFailureException;
 
     /**
      * Check if an access token is valid.
      *
-     * @param accessToken the access token to check
+     * @param request the access token to check
      *
      * @return The response containing the full access token object.
      *
      * @throws InvalidAccessTokenException if the access token is invalid.
      */
     CheckAccessTokenResponse check(
-        String accessToken
+        CheckRequest request
     ) throws InvalidAccessTokenException, TemporaryAccessTokenFailureException;
 
     /**

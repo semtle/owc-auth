@@ -49,23 +49,35 @@ public class StandardAuthenticationApi implements AuthenticationApi {
 
     @Override
     public AuthenticateResponse authenticate(AuthenticateRequest request)
-        throws InvalidCredentialsException, TemporaryAuthenticationFailureException {
+        throws InvalidCredentialsException, TemporaryAuthenticationFailureException, AuthenticationFailureException {
+        //todo trash and rewrite this.
+        //todo add multiple backend support
         User user;
         try {
-            user = userStorage.get(request.getUserId());
+            if (userStorage instanceof GetAndStoreUserStorage) {
+                GetAndStoreUserStorage getAndStoreUserStorage = (GetAndStoreUserStorage) userStorage;
+                user = getAndStoreUserStorage.get(request.getUserId());
+                if (!passwordHashingService.verify(request.getPassword(), user.getHashedPassword())) {
+                    throw new InvalidCredentialsException();
+                }
+                if (passwordHashingService.needsRehash(user.getHashedPassword())) {
+                    try {
+                        getAndStoreUserStorage.updatePassword(user.getUniqueUserId(), passwordHashingService.hash(request.getPassword()));
+                    } catch (StorageCurrentlyNotAvailableException ignored) {
+                    }
+                }
+            } else if (userStorage instanceof PassthruUserStorage) {
+                PassthruUserStorage passthruUserStorage = (PassthruUserStorage) userStorage;
+                user = passthruUserStorage.authenticate(request.getUserId(), request.getPassword());
+            } else {
+                throw new UnsupportedUserStorageException();
+            }
         } catch (UserNotFoundException e) {
+            //Calculate a random hash to throw off timing attacks
+            passwordHashingService.verify("", "*");
             throw new InvalidCredentialsException();
         } catch (StorageCurrentlyNotAvailableException e) {
             throw new TemporaryAuthenticationFailureException(e);
-        }
-        if (!passwordHashingService.verify(request.getPassword(), user.getHashedPassword())) {
-            throw new InvalidCredentialsException();
-        }
-        if (passwordHashingService.needsRehash(user.getHashedPassword())) {
-            try {
-                userStorage.updatePassword(request.getUserId(), passwordHashingService.hash(request.getPassword()));
-            } catch (StorageCurrentlyNotAvailableException ignored) {
-            }
         }
 
         AccessToken accessToken;
@@ -74,7 +86,7 @@ public class StandardAuthenticationApi implements AuthenticationApi {
             try {
                 AccessToken at = new AccessToken(
                     accessTokenIDGenerator.generate(),
-                    request.getUserId(),
+                    user.getUniqueUserId(),
                     LocalDateTime.from(temporalAccessor),
                     LocalDateTime.from(temporalAccessor).plus(defaultAccessTokenLifeTime, ChronoUnit.SECONDS)
                 );
@@ -93,11 +105,11 @@ public class StandardAuthenticationApi implements AuthenticationApi {
     }
 
     @Override
-    public CheckAccessTokenResponse check(String accessTokenId)
+    public CheckAccessTokenResponse check(CheckRequest request)
         throws InvalidAccessTokenException, TemporaryAccessTokenFailureException {
         AccessToken accessToken;
         try {
-            accessToken = accessTokenStorage.get(accessTokenId);
+            accessToken = accessTokenStorage.get(request.getAccessTokenId());
         } catch (AccessTokenNotFoundException e) {
             throw new InvalidAccessTokenException();
         } catch (StorageCurrentlyNotAvailableException e) {
@@ -110,7 +122,7 @@ public class StandardAuthenticationApi implements AuthenticationApi {
     public CheckAccessTokenResponse checkAndExtend(
         CheckAndExtendRequest request
     ) throws InvalidAccessTokenException, TemporaryAccessTokenFailureException {
-        AccessToken accessToken = check(request.getAccessToken()).getAccessToken();
+        AccessToken accessToken = check(request).getAccessToken();
         LocalDateTime newExpiryTime;
         if (request.getNewExpiryTime() != null) {
             newExpiryTime = request.getNewExpiryTime();

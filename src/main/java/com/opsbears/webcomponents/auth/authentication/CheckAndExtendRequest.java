@@ -5,28 +5,21 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.time.LocalDateTime;
 
 @ParametersAreNonnullByDefault
-public class CheckAndExtendRequest {
-    private final String accessToken;
+public class CheckAndExtendRequest extends CheckRequest {
     @Nullable
     private final LocalDateTime newExpiryTime;
 
-    public CheckAndExtendRequest(
-        String accessToken
-    ) {
-        this.accessToken = accessToken;
+    public CheckAndExtendRequest(String accessTokenId) {
+        super(accessTokenId);
         this.newExpiryTime = null;
     }
 
     public CheckAndExtendRequest(
-        String accessToken,
+        String accessTokenId,
         @Nullable LocalDateTime newExpiryTime
     ) {
-        this.accessToken = accessToken;
+        super(accessTokenId);
         this.newExpiryTime = newExpiryTime;
-    }
-
-    public String getAccessToken() {
-        return accessToken;
     }
 
     @Nullable
