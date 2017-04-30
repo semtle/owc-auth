@@ -22,6 +22,8 @@ public class PasswordHashingServiceImpl implements PasswordHashingService {
                 new UnixDisabledHashingProvider(),
                 new PBKDF2HashingProvider(1000, 16, new SecureRandomSaltGenerator()),
                 new BCryptHashingProvider(),
+                new SHA512CryptHashingProvider(new SecureRandomSaltGenerator()),
+                new SHA256CryptHashingProvider(new SecureRandomSaltGenerator()),
                 new MD5CryptHashingProvider(new SecureRandomSaltGenerator()),
                 new NTLMHashingProvider(),
                 new UnixCryptHashingProvider()
