@@ -13,6 +13,7 @@ public class BCryptHashingProvider implements PasswordHashingProvider {
             "$2a$",
             "$2x$",
             "$2y$"
+            //todo support $2b$ hashes
         };
     }
 
