@@ -6,6 +6,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAccessor;
+import java.util.concurrent.ExecutionException;
 
 @ParametersAreNonnullByDefault
 public class StandardAuthenticationApi implements AuthenticationApi {
@@ -56,7 +57,7 @@ public class StandardAuthenticationApi implements AuthenticationApi {
         try {
             if (userStorage instanceof GetAndStoreUserStorage) {
                 GetAndStoreUserStorage getAndStoreUserStorage = (GetAndStoreUserStorage) userStorage;
-                user = getAndStoreUserStorage.get(request.getUserId());
+                user = getAndStoreUserStorage.get(request.getUserId()).get();
                 if (!passwordHashingService.verify(request.getPassword(), user.getHashedPassword())) {
                     throw new InvalidCredentialsException();
                 }
@@ -68,7 +69,7 @@ public class StandardAuthenticationApi implements AuthenticationApi {
                 }
             } else if (userStorage instanceof PassthruUserStorage) {
                 PassthruUserStorage passthruUserStorage = (PassthruUserStorage) userStorage;
-                user = passthruUserStorage.authenticate(request.getUserId(), request.getPassword());
+                user = passthruUserStorage.authenticate(request.getUserId(), request.getPassword()).get();
             } else {
                 throw new UnsupportedUserStorageException();
             }
@@ -76,8 +77,17 @@ public class StandardAuthenticationApi implements AuthenticationApi {
             //Calculate a random hash to throw off timing attacks
             passwordHashingService.verify("", "*");
             throw new InvalidCredentialsException();
-        } catch (StorageCurrentlyNotAvailableException e) {
+        } catch (StorageCurrentlyNotAvailableException | InterruptedException e) {
             throw new TemporaryAuthenticationFailureException(e);
+        } catch (ExecutionException e) {
+            Throwable originalException = e.getCause();
+            if (originalException instanceof TemporaryAuthenticationFailureException) {
+                throw (TemporaryAuthenticationFailureException)originalException;
+            } else if (originalException instanceof RuntimeException) {
+                throw (RuntimeException)originalException;
+            } else {
+                throw new RuntimeException(e);
+            }
         }
 
         AccessToken accessToken;
