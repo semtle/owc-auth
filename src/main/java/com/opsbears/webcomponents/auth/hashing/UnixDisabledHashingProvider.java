@@ -14,7 +14,7 @@ public class UnixDisabledHashingProvider implements PasswordHashingProvider {
 
     @Override
     public boolean isSecure() {
-        return true;
+        return false;
     }
 
     @Override
